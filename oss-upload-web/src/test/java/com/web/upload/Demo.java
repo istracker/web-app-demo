@@ -10,8 +10,8 @@ public class Demo {
         // 以华东1（杭州）的外网Endpoint为例，其它Region请按实际情况填写。
         String endpoint = "https://oss-cn-shengzhen.aliyuncs.com";
         // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
-        String accessKeyId = "LTAI5t7Mb933vtv6r38uG86P";
-        String accessKeySecret = "P5e8RozYwvew8mmRq12bQYb0AfqMBc";
+        String accessKeyId = "";
+        String accessKeySecret = "";
         // 从STS服务获取的安全令牌（SecurityToken）。
         String securityToken = "yourSecurityToken";
         // 填写Bucket名称，例如examplebucket。

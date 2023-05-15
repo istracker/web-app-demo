@@ -10,9 +10,9 @@ import java.io.InputStream;
 public class OSSImageUploader {
 
     // 阿里云OSS的Endpoint、AccessKey和SecretKey等信息
-    private static final String ENDPOINT = "oss-cn-shenzhen.aliyuncs.com";
-    private static final String ACCESS_KEY_ID = "LTAI5t7Mb933vtv6r38uG86P";
-    private static final String ACCESS_KEY_SECRET = "P5e8RozYwvew8mmRq12bQYb0AfqMBc";
+    private static final String ENDPOINT = "";
+    private static final String ACCESS_KEY_ID = "";
+    private static final String ACCESS_KEY_SECRET = "";
     private static final String BUCKET_NAME = "sg-mall";
 
     public static void main(String[] args) {
