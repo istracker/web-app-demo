@@ -7,3 +7,6 @@ CREATE TABLE `tb_file_resource` (
                                     `f_create_time` datetime NOT NULL COMMENT '创建时间',
                                     PRIMARY KEY (`f_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='文件资源路径表';
+
+-- LTAI5t7Mb933vtv6r38uG86P
+-- P5e8RozYwvew8mmRq12bQYb0AfqMBc
