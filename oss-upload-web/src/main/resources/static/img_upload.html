@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>上传和展示图片</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left {
+            flex: 0 0 13%;
+            background-color: #C2C2C2;
+            display: flex;
+            flex-direction: column;
+            justify-content: top;
+            align-items: center;
+            padding: 50px;
+        }
+
+        .right {
+            flex: 1;
+            background-color: #FFEFDB;
+            display: flex;
+            flex-direction: column;
+            justify-content: top;
+            align-items: center;
+            padding: 50px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 2px 2px 2px #666;
+
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #fff;
+            color: #555;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #dcdcdc;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 0px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .upload-button[disabled],
+        .upload-button[disabled]:hover {
+            background-color: #3e8e41;
+            cursor: not-allowed;
+
+        }
+
+        .display-button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .display-button:hover {
+            background-color: #0b7dda;
+        }
+
+        .select-label {
+            padding: 8px 16px;
+            background-color: #6666cc;
+            color: #111111;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .select-label:hover {
+            background-color: #dcdcdc;
+        }
+
+        #displayImage {
+            max-width: 84%;
+            height: auto;
+            margin-top: 10px;
+            margin-left: 90px;
+            align-items: center;
+
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 500px;
+            transform: translate(-50%, -50%);
+            position: absolute;
+            top: 53%;
+            left: 50%;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="left">
+        <h2>图片上传</h2>
+        <hr color="red" size="2" width="100%" align="center">
+
+        <label for="inputImage" class="custom-file-upload" onclick="inputImage()">请选择图片</label>
+        <input type="file" id="inputImage" accept="image/*">
+        <button class="upload-button" onclick="uploadImage()" id="uploadButton">上传</button>
+
+        <div class="error-message" id="errorMessage">请先选择文件</div>
+        <select class="select-label" style="text-align-last: center;" id="imageList" onchange="displayImage()">
+            <option value="" disabled selected hidden>展示</option>
+        </select>
+    </div>
+    <div class="right">
+        <h2>图片展示</h2>
+        <hr color="red" size="2" width="100%" align="center">
+        <div>
+            <img class="img" id="displayImage">
+            <div class="error-message" id="errorMessageWhileImgIsNull">请先上传图片!!!</div>
+        </div>
+    </div>
+</div>
+
+
+<script src="http://gosspublic.alicdn.com/aliyun-oss-sdk-5.3.0.min.js"></script>
+<script>
+    var client = new OSS.Wrapper({
+        region: 'oss-cn-shenzhen',
+        accessKeyId: 'LTAI5t7Mb933vtv6r38uG86P',
+        accessKeySecret: 'P5e8RozYwvew8mmRq12bQYb0AfqMBc',
+        bucket: 'sg-mall',
+        secure: true
+    });
+
+    var fileSourceName; // 文件原始名称
+    var fileName; // 生成文件名称
+
+    function inputImage() {
+        var inputImage = document.getElementById("inputImage");
+        var errorMessage = document.getElementById("errorMessage");
+
+        var selectedFile = inputImage.files[0];
+        // 如果没有选中文件，则显示错误信息并退出
+        if (!selectedFile) {
+            console.log("ascacasc")
+            errorMessage.disabled = true;
+            errorMessage.classList.remove("show");
+        }
+    }
+
+    // 上传图片
+    function uploadImage() {
+
+        // 获取上传按钮元素和错误信息元素
+        var uploadButton = document.getElementById("uploadButton");
+        var errorMessage = document.getElementById("errorMessage");
+        // 获取文件输入框元素和选中的文件
+        var inputImage = document.getElementById("inputImage");
+        var selectedFile = inputImage.files[0];
+        // 如果没有选中文件，则显示错误信息并退出
+        if (!selectedFile) {
+            errorMessage.classList.add("show");
+            return;
+        }
+        // 禁用上传按钮
+        uploadButton.disabled = true;
+        // 增加一个灰色样式
+        uploadButton.classList.add("disabled");
+
+        var filePath = 'images/' + fileName;
+        client.put(filePath, selectedFile).then(function (result) {
+            alert('图片上传成功！');
+            // 启用上传按钮
+            uploadButton.disabled = false;
+            // 移除灰色样式
+            uploadButton.classList.remove("disabled");
+            saveImageUrl(result.url);
+        }).catch(function (err) {
+            console.log(err);
+            alert('图片上传失败!');
+        });
+    }
+
+
+    function getImageList() {
+        var tmpName;
+        fetch('http://localhost:8080/api/imageList')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                var select = document.getElementById("imageList");
+                console.log(select)
+                while (select.options.length > 0) {
+                    select.remove(0);
+                }
+                for (var i = 0; i < data.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = data[i];
+                    option.text = data[i];
+                    tmpName = data[i];
+                    select.add(option);
+                }
+                console.log("getImageList last_file_name:", tmpName);
+                displayImage(tmpName);
+            })
+            .catch(error => console.error(error));
+    }
+
+    getImageList();
+
+    function displayImage(name) {
+        console.log("displayImage -->", name)
+        var tmpName;
+        if (typeof name === 'undefined') {
+            var select = document.getElementById("imageList");
+            tmpName = select.options[select.selectedIndex].value;
+        } else {
+            tmpName = name;
+        }
+
+        fetch('http://localhost:8080/api/image/' + tmpName)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                var imageUrl = data.url;
+                console.log("ddddddd==>", imageUrl);
+                document.getElementById("displayImage").src = imageUrl;
+            })
+            .catch(function (error) {
+                console.log(error);
+                alert('获取图片url失败!');
+            });
+    }
+
+
+    function generateFileName(fileName) {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = ('0' + (currentDate.getMonth() + 1)).slice(-2);
+        var day = ('0' + currentDate.getDate()).slice(-2);
+        var randomString = Math.random().toString(36).substring(2, 8);
+        var randomNum = Math.floor(Math.random() * 1000000);
+
+        var suffix = fileName.slice((fileName.lastIndexOf('.') - 1 >>> 0) + 2);
+        return year + '/' + month + '/' + day + '/' + randomNum + '.' + suffix;
+    }
+
+
+    // 保存图片url到后端
+    function saveImageUrl(imageUrl) {
+        fetch('http://localhost:8080/api/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: fileSourceName, url: imageUrl})
+        }).then(function (response) {
+            getImageList();
+
+            console.log('图片url保存成功!!!', response);
+            // alert('图片url保存成功!');
+        }).catch(function (error) {
+            console.log(error);
+            alert('图片url保存失败！');
+        });
+    }
+
+    // 获取图片url
+    function getImageUrl() {
+        fetch('http://localhost:8080/api/image')
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                var imageUrl = data.url;
+                console.log("ddddddd==>", imageUrl);
+
+                var errorMessage = document.getElementById("errorMessageWhileImgIsNull");
+                if (imageUrl === "") {
+                    errorMessage.classList.add("show");
+                    return;
+                } else {
+                    document.getElementById("displayImage").src = imageUrl;
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+                alert('获取图片url失败!');
+            });
+    }
+
+
+    // 获取input元素
+    var input = document.getElementById("inputImage");
+
+    // 给input元素添加change事件
+    input.addEventListener('change', function () {
+        fileSourceName = input.files[0].name;
+        fileName = generateFileName(fileSourceName);
+        var uploadLabel = document.querySelector('.custom-file-upload');
+        uploadLabel.textContent = fileName; // 将Choose Image替换成文件名称
+    });
+
+</script>
+</body>
+</html>
